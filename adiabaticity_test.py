@@ -5,7 +5,7 @@ from simple_field import generic_field_3, generic_xderiv_3, generic_zderiv_3
 from move_stepper import neutron_stepper
 from thermal_distribution import gen_velocities
 
-neutrons = 100
+neutrons = 5
 temperature = 4e-3
 m_neutron = 1.6749286e-27
 
@@ -14,10 +14,10 @@ init_velocities[:,1] = abs(init_velocities[:,1])
 init_speed = np.sqrt(init_velocities[:,0]**2 + init_velocities[:,1]**2 + init_velocities[:,2]**2)
 
 init_positions = np.zeros((neutrons, 3))
-width = 1e-9
-init_positions[:,0] = np.random.normal(0, width, np.shape(init_positions[:,0]))#np.random.uniform(-np.sqrt(0.035), np.sqrt(0.035), np.shape(neutrons,)) // np.random.normal(0, width, np.shape(init_positions[:,0]))
+width = 1e-2
+init_positions[:,0] = np.random.uniform(0, width, np.shape(init_positions[:,0]))#np.random.uniform(-np.sqrt(0.035), np.sqrt(0.035), np.shape(neutrons,)) // np.random.normal(0, width, np.shape(init_positions[:,0]))
 init_positions[:,1] = np.zeros(np.shape(init_positions[:,0]))
-init_positions[:,2] = np.random.normal(0, width, np.shape(init_positions[:,0]))#np.random.uniform(-np.sqrt(0.035), np.sqrt(0.035), np.shape(neutrons,)) // np.random.normal(0, width, np.shape(init_positions[:,0]))
+init_positions[:,2] = np.random.uniform(0, width, np.shape(init_positions[:,0]))#np.random.uniform(-np.sqrt(0.035), np.sqrt(0.035), np.shape(neutrons,)) // np.random.normal(0, width, np.shape(init_positions[:,0]))
 
 initial_log = np.zeros((neutrons,6))
 initial_log[:,:3] = init_positions
@@ -33,7 +33,7 @@ print(avg_collision_time)
 
 decay = 0
 for i in range(neutrons):
-    log, bounces, dnf = neutron_stepper(initial_log[i], t0 = 0, t_span = 0.1, dt = avg_collision_time*1e-3, bounds = bounds, decay = False, spin_tracking = True)
+    log, bounces, dnf = neutron_stepper(initial_log[i], t0 = 0, t_span = 0.1, dt = avg_collision_time*1e-3, bounds = bounds, decay = False, spin_tracking = True, fieldfile = 'NUB_150mA_subtracted.txt')
     if dnf == 0:
         neutron_log.append(log)
     else:

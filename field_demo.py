@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 import simple_field
 
-coef = [0, 0, 0, 0, 0, 0, 1]
+coef = [0, 0, 0, 0, 1, 0, 0, 0, 0]
 N = 100
 cnt = 0
 plane = np.zeros((N*N, 3))

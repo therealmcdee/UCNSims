@@ -1,5 +1,6 @@
 import numpy as np 
 from scipy.spatial.transform import Rotation
+from scipy.interpolate import RegularGridInterpolator as RGI
 
 from simple_field import generic_xderiv_3, generic_zderiv_3
 
@@ -10,7 +11,7 @@ h = 6.626e-34
 neutron_mag = g_neutron*nuclear_mag
 gyromagnetic_ratio = 2*(g_neutron*nuclear_mag)/(h/(2*np.pi))
 
-def neutron_stepper(initial, t0, t_span, dt, bounds = None, decay = False, spin_tracking = False, coef = None):
+def neutron_stepper(initial, t0, t_span, dt, bounds = None, decay = False, spin_tracking = False, coef = None, fieldfile = None):
     log = []
     s_initial = np.array([0, 0, -1])
     t = 0
@@ -20,7 +21,32 @@ def neutron_stepper(initial, t0, t_span, dt, bounds = None, decay = False, spin_
         log.append([t, initial[0], initial[1], initial[2], initial[3], initial[4], initial[5]])
     elif spin_tracking == True:
         if coef == None:
-            coef = np.array([0.00000000e+00, 8.36279257e-03, 9.14379959e-01, -1.60091662e-01, -3.61960986e-01, 1.65867711e+01, 1.39017307e-01, 1.46966811e+01, -9.29917816e-01])
+            coef = np.array([0, 0, 5, 0, 1, 0, 0, 0, 0])
+            #coef = np.array([0.00000000e+00,  7.19805747e-08,  8.60186407e-06, -4.91957698e-06, -1.11316291e-05,  1.66550372e-03,  1.39837144e-05,  8.76780834e-06, -5.45416237e-07])
+        if fieldfile != None:
+            fielddata = np.loadtxt(fieldfile, delimiter = ' ')
+            fielddata = fielddata[:(len(fielddata)-1)]
+            indices = np.arange(len(fielddata))
+            new = np.zeros(np.shape(fielddata))
+            for i in range(len(fielddata)-1):
+                if fielddata[i,0] == -0:
+                    fielddata[i, 0] = 0
+                if fielddata[i, 0] < fielddata[i-1, 0]:
+                    hold = indices[i]
+                    hold2 = indices[i-1]
+                    indices[i] = hold2
+                    indices[i-1] = hold
+            for i in range(len(fielddata)):
+                print(fielddata[indices[i], 0])
+                new[i] = fielddata[indices[i]]
+            x = np.ndarray.flatten(new[:,0])
+            y = np.ndarray.flatten(new[:,1])
+            z = np.ndarray.flatten(new[:,2])
+            print(x)
+            #xg, yg, zg = np.meshgrid(x, y, z, indexing = 'ij', sparse = True)
+            Bx = RGI((x, y, z), new[:,4])
+            By = RGI((x, y, z), new[:,5])
+            Bz = RGI((x, y, z), new[:,6])
         next = np.zeros(9)
         s_next = np.zeros(3)
         spin_step = dt
@@ -36,23 +62,28 @@ def neutron_stepper(initial, t0, t_span, dt, bounds = None, decay = False, spin_
             next[i] = initial[i] + initial[i+3]*dt + 0.5*a[i]*(dt**2)
             next[i+3] = initial[i+3] + a[i]*dt
         if spin_tracking == True:
-            B = np.zeros(3)
-            B[0] = generic_xderiv_3(coef, np.array([initial[:3]]))
-            B[2] = generic_zderiv_3(coef, np.array([initial[:3]]))
+            if fieldfile == None:
+                B = np.zeros(3)
+                B[0] = generic_xderiv_3(coef, np.array([initial[:3]]))
+                B[2] = generic_zderiv_3(coef, np.array([initial[:3]]))
+            else:
+                B = np.array([Bx(next), By(next), Bz(next)])
             dx = np.zeros(3)
             k1 = gyromagnetic_ratio*np.cross(s_initial, B)*spin_step/2
-            r = Rotation.from_rotvec(k1)
-            s1 = np.matmul(r.as_matrix(), s_initial)
+            #r = Rotation.from_rotvec(k1)
+            s1 = s_initial + k1*spin_step/2 #np.matmul(r.as_matrix(), s_initial)
             k2 = gyromagnetic_ratio*np.cross(s1, B)*spin_step/2
-            r = Rotation.from_rotvec(k2)
-            s2 = np.matmul(r.as_matrix(), s1)
+            #r = Rotation.from_rotvec(k2)
+            s2 = s_initial + k2*spin_step/2 #np.matmul(r.as_matrix(), s1)
             k3 = gyromagnetic_ratio*np.cross(s2, B)*spin_step
-            r = Rotation.from_rotvec(k3)
-            s3 = np.matmul(r.as_matrix(), s2)
+            #r = Rotation.from_rotvec(k3)
+            s3 = s_initial + k3*spin_step #np.matmul(r.as_matrix(), s2)
             k4 = gyromagnetic_ratio*np.cross(s3, B)*spin_step
             dx = (k1 + 2*k2 + 2*k3 + k4)*(spin_step/6)
-            r = Rotation.from_rotvec(dx)
-            s_next = np.matmul(r.as_matrix(), s_initial)
+            #r = Rotation.from_rotvec(dx)
+            s_next = s_initial + dx #np.matmul(r.as_matrix(), s_initial)
+            length = np.sqrt(s_next[0]**2 + s_next[1]**2 + s_next[2]**2)
+            s_next = s_next/length
         if bounds != None:
             if len(bounds) == 1:
                 R = bounds[0]
