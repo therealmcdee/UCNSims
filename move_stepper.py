@@ -48,8 +48,8 @@ def neutron_stepper(N, T, m, t_span, bounds = None, decay = False, spin_tracking
             log.append([t, initial[0], initial[1], initial[2], initial[3], initial[4], initial[5]])
         elif spin_tracking == True:
             if coef is None:
-                #coef = np.array([0, 0, 5, 0, 1, 0, 0, 0, 0])
-                coef = np.array([0.00000000e+00,  7.19805747e-08,  8.60186407e-06, -4.91957698e-06, -1.11316291e-05,  1.66550372e-03,  1.39837144e-05,  8.76780834e-06, -5.45416237e-07])
+                coef = np.array([0, 0, 1e-9, 1e-6, 0, 0, 0, 0, 0])
+                #coef = np.array([0.00000000e+00,  7.19805747e-08,  8.60186407e-06, -4.91957698e-06, -1.11316291e-05,  1.66550372e-03,  1.39837144e-05,  8.76780834e-06, -5.45416237e-07])
             if fieldfile != None:
                 Bx, By, Bz  = generate_field_interp(fieldfile)
             next = np.zeros(9)
@@ -106,7 +106,7 @@ def neutron_stepper(N, T, m, t_span, bounds = None, decay = False, spin_tracking
                         bounces += 1
                     elif next[2]>h1:
                         time_to_hit_wall = (h1-initial[2])/initial[5]
-                        print(time_to_hit_wall)
+                        print(h1-initial[2])
                         r_evo = initial[:3] + initial[3:6]*time_to_hit_wall + 0.5*a*(time_to_hit_wall**2)
                         vnew = [initial[3], initial[4], -initial[5]]
                         for i in range(3):

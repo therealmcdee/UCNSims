@@ -24,7 +24,7 @@ initial_log[:,:3] = init_positions
 initial_log[:,3:] = init_velocities
 
 neutron_log = []
-bounds = [0.05]#, 0, 0]# [0.0375, 0, 0.0375]
+bounds = [0.25, 0.15, 0.05]#, 0, 0]# [0.0375, 0, 0.0375]
 
 d = bounds[0]*2
 avg_init_speed = sum(init_speed)/neutrons
@@ -33,7 +33,7 @@ print(avg_collision_time)
 
 decay = 0
 for i in range(neutrons):
-    log, bounces, dnf = neutron_stepper(initial_log[i], t0 = 0, t_span = 0.1, dt = avg_collision_time*1e-3, bounds = bounds, decay = False, spin_tracking = True, fieldfile = 'NUB_150mA_subtracted.txt')
+    log, bounces, dnf = neutron_stepper(initial_log[i], t0 = 0, t_span = 0.1, dt = avg_collision_time*1e-3, bounds = bounds, decay = False, spin_tracking = True)#, fieldfile = 'NUB_150mA_subtracted.txt')
     if dnf == 0:
         neutron_log.append(log)
     else:

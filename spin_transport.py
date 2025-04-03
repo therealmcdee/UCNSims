@@ -3,14 +3,16 @@ import matplotlib.pyplot as plt
 
 from move_stepper import neutron_stepper
 
-neutrons = 50
+neutrons = 5
 temp = 4e-3
 m_neutron = 1.6749286e-27
 
-bounds = [0.25]#, 0.15, 0.05]
-print(len(bounds))
+bounds = [0.25, 0.15, 0.05]
 
-neutron_log = neutron_stepper(neutrons, temp, m_neutron, t_span = 0.1, bounds = bounds, decay = False, spin_tracking = True)
+#coef = [0, 0.1, 0.1, 0, 0.1, 0, 0, 0, 0]
+coef = [0.00000000e+00, 7.12977044e-08, 8.59758354e-06, -2.06757853e-08, 7.57670433e-10, -4.87126848e-07, 9.50606492e-07, 3.68833560e-08, -1.12092833e-08]
+
+neutron_log = neutron_stepper(neutrons, temp, m_neutron, t_span = 10, bounds = bounds, decay = False, spin_tracking = True, coef = coef)
 
 
 
@@ -43,11 +45,14 @@ plt.suptitle(f'n = {neutrons} UCN in {bounds[0]} m guide')
 plt.tight_layout()
 
 
-fig = plt.figure()
+fig, ax = plt.subplots(2,1)
 for i in range(neutrons):
-    plt.plot(neutron_log[i,:,1], neutron_log[i,:,3])
-plt.xlabel('x [m]')
-plt.ylabel('z [m]')
+    ax[0].plot(neutron_log[i,:,1], neutron_log[i,:,3])
+    ax[1].plot(neutron_log[i,:,2], neutron_log[i,:,3])
+ax[0].set_xlabel('x [m]')
+ax[0].set_ylabel('z [m]')
+ax[1].set_xlabel('y [m]')
+ax[1].set_ylabel('z [m]')
 
 
 plt.show()
