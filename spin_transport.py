@@ -3,16 +3,16 @@ import matplotlib.pyplot as plt
 
 from move_stepper import neutron_stepper
 
-neutrons = 10
+neutrons = 15
 temp = 4e-3
 m_neutron = 1.6749286e-27
 
 bounds = [0.25, 0.15, 0.05]
 
-coef = [0, 0, 0, 0, 0, 0, 0, 0, 1e-3]
+coef = [0, 0, 0, 1e-3, 1e-3, 0, 0, 0, 0]
 #coef = [0.00000000e+00, 7.12977044e-08, 8.59758354e-06, -2.06757853e-08, 7.57670433e-10, -4.87126848e-07, 9.50606492e-07, 3.68833560e-08, -1.12092833e-08]
 
-neutron_log = neutron_stepper(neutrons, temp, m_neutron, t_span = 1.5, bounds = bounds, decay = False, spin_tracking = True, coef = coef)
+neutron_log = neutron_stepper(neutrons, temp, m_neutron, t_span = 5, bounds = bounds, decay = False, spin_tracking = True, coef = coef)
 
 
 

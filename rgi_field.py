@@ -3,9 +3,12 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import RegularGridInterpolator as RGI 
 
 
-def generate_field_interp(filename):
-    odata = np.loadtxt(filename, delimiter = ' ')
-    data = odata[:(len(odata)-1)]
+def generate_field_interp(data, response_curve = False):
+    rflag = 0
+    if response_curve == True:
+        rflag = 1
+    #odata = np.loadtxt(filename, delimiter = ' ')
+    #data = odata[:(len(odata)-1)]
 
     new = np.zeros(np.shape(data))
 
@@ -46,17 +49,17 @@ def generate_field_interp(filename):
             for k in range(len(zv)):
                 for n in range(len(data)):
                     if data[n,0]==xv[i] and data[n, 1]==yv[j] and data[n, 2]==zv[k]:
-                        bxgrid[i][j][k] = data[n, 4]
-                        bygrid[i][j][k] = data[n, 5]
-                        bzgrid[i][j][k] = data[n, 6]
+                        bxgrid[i][j][k] = data[n, 4 - rflag]
+                        bygrid[i][j][k] = data[n, 5 - rflag]
+                        bzgrid[i][j][k] = data[n, 6 - rflag]
                         grid[cnt][0] = xv[i]
                         grid[cnt][1] = yv[j]
                         grid[cnt][2] = zv[k]
                         cnt += 1
                     
 
-    Bx = RGI([xv, yv, zv], bxgrid)
-    By = RGI([xv, yv, zv], bygrid)
-    Bz = RGI([xv, yv, zv], bzgrid)
+    Bx = RGI([xv, yv, zv], bxgrid, method = 'cubic')
+    By = RGI([xv, yv, zv], bygrid, method = 'cubic')
+    Bz = RGI([xv, yv, zv], bzgrid, method = 'cubic')
 
     return Bx, By, Bz
