@@ -119,13 +119,22 @@ for i in range(len(pax)):
 combo_onax = same_grid[(same_grid[:,0]==0) & (same_grid[:,2]==0)]
 
 fig0, ax0 = plt.subplots(3, 1, sharex=True)
+ax0[0].scatter(Bonax[:,1], Bonax[:,3]*1e6, color = 'k')
+ax0[0].scatter(Conax[:,1], Conax[:,3]*1e6, color = 'k')
+ax0[0].scatter(Donax[:,1], Donax[:,3]*1e6, color = 'k')
+ax0[0].plot(combo_onax[:,1], combo_onax[:,3]*1e6, color='r')
+
+ax0[1].scatter(Bonax[:,1], Bonax[:,4]*1e6, color = 'k')
+ax0[1].scatter(Conax[:,1], Conax[:,4]*1e6, color = 'k')
+ax0[1].scatter(Donax[:,1], Donax[:,4]*1e6, color = 'k')
+ax0[1].plot(combo_onax[:,1], combo_onax[:,4]*1e6, color='r')
+
 #plt.scatter(Aonax[:,1], Aonax[:,5])
-plt.scatter(Bonax[:,1], Bonax[:,5]*1e6, color = 'k')
-#plt.plot(bf_z[:,1], bf_z[:,5]*1e6, color = 'r')
-plt.scatter(Conax[:,1], Conax[:,5]*1e6, color = 'k')
-#plt.plot(cf_z[:,1], cf_z[:,5]*1e6, color = 'r')
-plt.scatter(Donax[:,1], Donax[:,5]*1e6, color = 'k')
-#plt.plot(df_z[:,1], df_z[:,5]*1e6, color = 'r')
-plt.plot(combo_onax[:,1], combo_onax[:,5]*1e6)
+ax0[2].scatter(Bonax[:,1], Bonax[:,5]*1e6, color = 'k')
+ax0[2].scatter(Conax[:,1], Conax[:,5]*1e6, color = 'k')
+ax0[2].scatter(Donax[:,1], Donax[:,5]*1e6, color = 'k')
+ax0[2].plot(combo_onax[:,1], combo_onax[:,5]*1e6, color = 'r')
+
+
 
 plt.show()
