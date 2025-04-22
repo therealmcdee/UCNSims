@@ -5,6 +5,7 @@ from scipy.interpolate import RegularGridInterpolator as RGI
 from simple_field import generic_xderiv_3, generic_zderiv_3
 from rgi_field import generate_field_interp
 from thermal_distribution import gen_velocities
+from stc_coil_function import gen_stc_interpolation
 
 m_neutron = 1.6749286e-27
 g_neutron = -1.913
@@ -13,7 +14,9 @@ h = 6.626e-34
 neutron_mag = g_neutron*nuclear_mag
 gyromagnetic_ratio = 2*(g_neutron*nuclear_mag)/(h/(2*np.pi))
 
-def neutron_stepper(N, T, m, t_span, bounds = None, decay = False, spin_tracking = False, coef = None, fieldfile = None):
+def neutron_stepper(N, T, m, t_span, bounds = None, decay = False, spin_tracking = False, coef = None, fieldfile = None, stcfield = False):
+    if stcfield == True:
+        Bx, By, Bz  = gen_stc_interpolation('SL', np.array([10, 30, 30, 100]))
     init_velocities = gen_velocities(N, T, m)
     init_speed = np.sqrt(init_velocities[:,0]**2 + init_velocities[:,1]**2 + init_velocities[:,2]**2)
     avg_speed = sum(init_speed)/N
@@ -49,9 +52,7 @@ def neutron_stepper(N, T, m, t_span, bounds = None, decay = False, spin_tracking
         elif spin_tracking == True:
             if coef is None:
                 coef = np.array([0, 0, 1e-9, 1e-6, 0, 0, 0, 0, 0])
-                #coef = np.array([0.00000000e+00,  7.19805747e-08,  8.60186407e-06, -4.91957698e-06, -1.11316291e-05,  1.66550372e-03,  1.39837144e-05,  8.76780834e-06, -5.45416237e-07])
-            if fieldfile != None:
-                Bx, By, Bz  = generate_field_interp(fieldfile)
+                #coef = np.array([0.00000000e+00,  7.19805747e-08,  8.60186407e-06, -4.91957698e-06, -1.11316291e-05,  1.66550372e-03,  1.39837144e-05,  8.76780834e-06, -5.45416237e-07]
             next = np.zeros(9)
             s_next = np.zeros(3)
             spin_step = dt
@@ -122,15 +123,18 @@ def neutron_stepper(N, T, m, t_span, bounds = None, decay = False, spin_tracking
                             next[i+3] = vnew[i] + a[i]*(dt-time_to_hit_wall)
                         bounces += 1
             if spin_tracking == True:
-                if fieldfile == None:
+                if stcfield == False:
                     B = np.zeros(3)
                     B[0] = generic_xderiv_3(coef, np.array([next[:3]]))
                     B[2] = generic_zderiv_3(coef, np.array([next[:3]]))
+                if next[1] >= 0.8:
+                    B = np.zeros(3)
                 else:
                     B = np.zeros(3)
                     B[0] = Bx(next[:3])
                     B[1] = By(next[:3])
                     B[2] = Bz(next[:3])
+                    print(B)
                 dx = np.zeros(3)
                 k1 = gyromagnetic_ratio*np.cross(s_initial, B)*spin_step/2
                 #r = Rotation.from_rotvec(k1)
@@ -159,7 +163,8 @@ def neutron_stepper(N, T, m, t_span, bounds = None, decay = False, spin_tracking
             neutron_log.append([])
             neutron_log[n] = log
         else:
-            continue  
+            continue 
+        print(n)
     return np.asarray(neutron_log)
             
     

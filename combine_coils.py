@@ -6,7 +6,7 @@ from rgi_field import generate_field_interp
 
 parent_dir = 'STC_3DMAPS_2025/response_curves'
 
-coilset = 'SU'
+coilset = 'SL'
         ## A, B, C, D
 currents = (1e-3)*np.array([10, 30, 30, 100])
 
@@ -94,27 +94,8 @@ for i in range(len(pax)):
                 same_grid[cnt][4] += di_y([x, y, z])[0]
                 same_grid[cnt][5] += di_z([x, y, z])[0]
             cnt += 1
+            
 
-#Bgrid = same_grid[(same_grid[:,1]<=max(Bonax[:,1])) & (same_grid[:,1]>=min(Bonax[:,1]))][:,:3]
-#Bcont = bi_z(Bgrid)
-#Binterp = np.zeros((len(Bgrid), 6))
-#Binterp[:,:3] = Bgrid
-#Binterp[:,5] = Bcont
-#bf_z = Binterp[(Binterp[:,0]==0) & (Binterp[:,2]==0)]
-
-#Cgrid = same_grid[(same_grid[:,1]<=max(Conax[:,1])) & (same_grid[:,1]>=min(Conax[:,1]))][:,:3]
-#Ccont = ci_z(Cgrid)
-#Cinterp = np.zeros((len(Cgrid), 6))
-#Cinterp[:,:3] = Cgrid
-#Cinterp[:,5] = Ccont
-#cf_z = Cinterp[(Cinterp[:,0]==0) & (Cinterp[:,2]==0)]
-
-#Dgrid = same_grid[(same_grid[:,1]<=max(Donax[:,1])) & (same_grid[:,1]>=min(Donax[:,1]))][:,:3]
-#Dcont = di_z(Dgrid)
-#Dinterp = np.zeros((len(Dgrid), 6))
-#Dinterp[:,:3] = Dgrid
-#Dinterp[:,5] = Dcont
-#df_z = Dinterp[(Dinterp[:,0]==0) & (Dinterp[:,2]==0)]
 
 combo_onax = same_grid[(same_grid[:,0]==0) & (same_grid[:,2]==0)]
 
@@ -123,18 +104,22 @@ ax0[0].scatter(Bonax[:,1], Bonax[:,3]*1e6, color = 'k')
 ax0[0].scatter(Conax[:,1], Conax[:,3]*1e6, color = 'k')
 ax0[0].scatter(Donax[:,1], Donax[:,3]*1e6, color = 'k')
 ax0[0].plot(combo_onax[:,1], combo_onax[:,3]*1e6, color='r')
+ax0[0].set_ylabel(r'$B_{x}$ $[\mu T]$', fontsize = 16)
 
 ax0[1].scatter(Bonax[:,1], Bonax[:,4]*1e6, color = 'k')
 ax0[1].scatter(Conax[:,1], Conax[:,4]*1e6, color = 'k')
 ax0[1].scatter(Donax[:,1], Donax[:,4]*1e6, color = 'k')
 ax0[1].plot(combo_onax[:,1], combo_onax[:,4]*1e6, color='r')
+ax0[1].set_ylabel(r'$B_{y}$ $[\mu T]$', fontsize = 16)
 
 #plt.scatter(Aonax[:,1], Aonax[:,5])
 ax0[2].scatter(Bonax[:,1], Bonax[:,5]*1e6, color = 'k')
 ax0[2].scatter(Conax[:,1], Conax[:,5]*1e6, color = 'k')
 ax0[2].scatter(Donax[:,1], Donax[:,5]*1e6, color = 'k')
 ax0[2].plot(combo_onax[:,1], combo_onax[:,5]*1e6, color = 'r')
+ax0[2].set_ylabel(r'$B_{z}$ $[\mu T]$', fontsize = 16)
 
-
-
+plt.subplots_adjust(hspace=0)
+#plt.tight_layout()
+plt.suptitle(f'STC_{coilset} [A, B, C, D] = {currents}')
 plt.show()
