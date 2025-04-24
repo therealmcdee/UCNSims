@@ -6,7 +6,7 @@ from rgi_field import generate_field_interp
 
 parent_dir = 'STC_3DMAPS_2025/response_curves'
 
-coilset = 'SL'
+coilset = 'SU'
         ## A, B, C, D
 currents = (1e-3)*np.array([8, 30, 30, 100])
 
@@ -72,7 +72,7 @@ di_x, di_y, di_z = generate_field_interp(Dfield, response_curve = True)
 N2 = 31
 cnt = 0
 same_grid = np.zeros((N2**3, 6))
-yax = np.linspace(0, 0.8, N2)
+yax = np.linspace(min(Donax[:,1]), max(Aonax[:,1]), N2)
 pax = np.linspace(-0.01, 0.01, N2)
 for i in range(len(pax)):
     for j in range(len(yax)):
@@ -85,23 +85,32 @@ for i in range(len(pax)):
                 same_grid[cnt][3] += ai_x([x,y,z])[0]
                 same_grid[cnt][4] += ai_y([x,y,z])[0]
                 same_grid[cnt][5] += ai_z([x,y,z])[0]
+                print(same_grid[cnt][3:6])
             if min(Bonax[:,1])<= y <= max(Bonax[:,1]):
                 same_grid[cnt][3] += bi_x([x, y, z])[0]
                 same_grid[cnt][4] += bi_y([x, y, z])[0]
                 same_grid[cnt][5] += bi_z([x, y, z])[0]
+                print(same_grid[cnt][3:6])
             if min(Conax[:,1])<= y <= max(Conax[:,1]):
                 same_grid[cnt][3] += ci_x([x, y, z])[0]
                 same_grid[cnt][4] += ci_y([x, y, z])[0]
                 same_grid[cnt][5] += ci_z([x, y, z])[0]
+                print(same_grid[cnt][3:6])
             if min(Donax[:,1])<= y <= max(Donax[:,1]):
                 same_grid[cnt][3] += di_x([x, y, z])[0]
                 same_grid[cnt][4] += di_y([x, y, z])[0]
                 same_grid[cnt][5] += di_z([x, y, z])[0]
+                print(same_grid[cnt][3:6])
+                    
             cnt += 1
             
 
 
 combo_onax = same_grid[(same_grid[:,0]==0) & (same_grid[:,2]==0)]
+
+stcx, stcy, stcz = generate_field_interp(same_grid, response_curve=True)
+print(type(stcx))
+print(stcx([0, 0.4, 0]))
 
 fig0, ax0 = plt.subplots(3, 1, sharex=True)
 ax0[0].scatter(Aonax[:,1], Aonax[:,3]*1e6)

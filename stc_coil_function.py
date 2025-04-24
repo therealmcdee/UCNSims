@@ -8,7 +8,6 @@ from rgi_field import generate_field_interp
 def gen_stc_interpolation(coilset, currents):
     parent_dir = 'STC_3DMAPS_2025/response_curves'
         ## A, B, C, D
-    currents = (1e-3)*currents
     Afield = []
     Bfield = []
     Cfield = []
@@ -25,7 +24,7 @@ def gen_stc_interpolation(coilset, currents):
                 response = np.loadtxt(parent_dir+'/'+i, delimiter = ' ')
                 Afield = np.zeros_like(response)
                 Afield[:,:3] = response[:,:3]
-                Afield[:,1] = response[:,1] + start
+                Afield[:,1] = response[:,1] + start - coilstart
                 Afield[:,3:6] = currents[0]*response[:,3:6]
             elif i[2] == 'B':
                 coilstart = 7.62/100
@@ -58,12 +57,12 @@ def gen_stc_interpolation(coilset, currents):
                 Dfield[:,1] = response[:,1] + start - coilstart
                 Dfield[:,3:6] = currents[3]*response[:,3:6]
 
-    #Aonax = Afield[(Afield[:,0]==0) & (Afield[:,2]==0)]
+    Aonax = Afield[(Afield[:,0]==0) & (Afield[:,2]==0)]
     Bonax = Bfield[(Bfield[:,0]==0) & (Bfield[:,2]==0)]
     Conax = Cfield[(Cfield[:,0]==0) & (Cfield[:,2]==0)]
     Donax = Dfield[(Dfield[:,0]==0) & (Dfield[:,2]==0)]
-
-    #ai_x, ai_y, ai_z = generate_field_interp(Afield, response_curve = True)
+    print(Donax)
+    ai_x, ai_y, ai_z = generate_field_interp(Afield, response_curve = True)
     bi_x, bi_y, bi_z = generate_field_interp(Bfield, response_curve = True)
     ci_x, ci_y, ci_z = generate_field_interp(Cfield, response_curve = True)
     di_x, di_y, di_z = generate_field_interp(Dfield, response_curve = True)
@@ -71,7 +70,7 @@ def gen_stc_interpolation(coilset, currents):
     N2 = 31
     cnt = 0
     same_grid = np.zeros((N2**3, 6))
-    yax = np.linspace(0, 0.8, N2)
+    yax = np.linspace(min(Donax[:,1]), max(Aonax[:,1]), N2)
     pax = np.linspace(-0.01, 0.01, N2)
     for i in range(len(pax)):
         for j in range(len(yax)):
@@ -80,21 +79,29 @@ def gen_stc_interpolation(coilset, currents):
                 same_grid[cnt][0] = x
                 same_grid[cnt][1] = y
                 same_grid[cnt][2] = z
+                if min(Aonax[:,1])<= y <= max(Aonax[:,1]):
+                    same_grid[cnt][3] += ai_x([x, y, z])
+                    same_grid[cnt][4] += ai_y([x, y, z])
+                    same_grid[cnt][5] += ai_z([x, y, z])
+                    #print(same_grid[cnt][3:6])
                 if min(Bonax[:,1])<= y <= max(Bonax[:,1]):
-                    same_grid[cnt][3] += bi_x([x, y, z])[0]
-                    same_grid[cnt][4] += bi_y([x, y, z])[0]
-                    same_grid[cnt][5] += bi_z([x, y, z])[0]
+                    same_grid[cnt][3] += bi_x([x, y, z])
+                    same_grid[cnt][4] += bi_y([x, y, z])
+                    same_grid[cnt][5] += bi_z([x, y, z])
+                    #print(same_grid[cnt][3:6])
                 if min(Conax[:,1])<= y <= max(Conax[:,1]):
-                    same_grid[cnt][3] += ci_x([x, y, z])[0]
-                    same_grid[cnt][4] += ci_y([x, y, z])[0]
-                    same_grid[cnt][5] += ci_z([x, y, z])[0]
+                    same_grid[cnt][3] += ci_x([x, y, z])
+                    same_grid[cnt][4] += ci_y([x, y, z])
+                    same_grid[cnt][5] += ci_z([x, y, z])
+                    #print(same_grid[cnt][3:6])
                 if min(Donax[:,1])<= y <= max(Donax[:,1]):
-                    same_grid[cnt][3] += di_x([x, y, z])[0]
-                    same_grid[cnt][4] += di_y([x, y, z])[0]
-                    same_grid[cnt][5] += di_z([x, y, z])[0]
+                    same_grid[cnt][3] += di_x([x, y, z])
+                    same_grid[cnt][4] += di_y([x, y, z])
+                    same_grid[cnt][5] += di_z([x, y, z])
+                    #print(same_grid[cnt][3:6])
                 cnt += 1
 
-
+    #print(same_grid)
     stc_x, stc_y, stc_z = generate_field_interp(same_grid, response_curve = True)
 
     return stc_x, stc_y, stc_z
