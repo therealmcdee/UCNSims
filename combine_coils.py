@@ -8,7 +8,7 @@ parent_dir = 'STC_3DMAPS_2025/response_curves'
 
 coilset = 'SL'
         ## A, B, C, D
-currents = (1e-3)*np.array([10, 30, 30, 100])
+currents = (1e-3)*np.array([8, 30, 30, 100])
 
 Afield = []
 Bfield = []
@@ -26,7 +26,7 @@ for i in os.listdir(parent_dir):
             response = np.loadtxt(parent_dir+'/'+i, delimiter = ' ')
             Afield = np.zeros_like(response)
             Afield[:,:3] = response[:,:3]
-            Afield[:,1] = response[:,1] + start
+            Afield[:,1] = response[:,1] + start - coilstart
             Afield[:,3:6] = currents[0]*response[:,3:6]
         elif i[2] == 'B':
             coilstart = 7.62/100
@@ -59,12 +59,12 @@ for i in os.listdir(parent_dir):
             Dfield[:,1] = response[:,1] + start - coilstart
             Dfield[:,3:6] = currents[3]*response[:,3:6]
 
-#Aonax = Afield[(Afield[:,0]==0) & (Afield[:,2]==0)]
+Aonax = Afield[(Afield[:,0]==0) & (Afield[:,2]==0)]
 Bonax = Bfield[(Bfield[:,0]==0) & (Bfield[:,2]==0)]
 Conax = Cfield[(Cfield[:,0]==0) & (Cfield[:,2]==0)]
 Donax = Dfield[(Dfield[:,0]==0) & (Dfield[:,2]==0)]
 
-#ai_x, ai_y, ai_z = generate_field_interp(Afield, response_curve = True)
+ai_x, ai_y, ai_z = generate_field_interp(Afield, response_curve = True)
 bi_x, bi_y, bi_z = generate_field_interp(Bfield, response_curve = True)
 ci_x, ci_y, ci_z = generate_field_interp(Cfield, response_curve = True)
 di_x, di_y, di_z = generate_field_interp(Dfield, response_curve = True)
@@ -81,6 +81,10 @@ for i in range(len(pax)):
             same_grid[cnt][0] = x
             same_grid[cnt][1] = y
             same_grid[cnt][2] = z
+            if min(Aonax[:,1])<= y <= max(Aonax[:,1]):
+                same_grid[cnt][3] += ai_x([x,y,z])[0]
+                same_grid[cnt][4] += ai_y([x,y,z])[0]
+                same_grid[cnt][5] += ai_z([x,y,z])[0]
             if min(Bonax[:,1])<= y <= max(Bonax[:,1]):
                 same_grid[cnt][3] += bi_x([x, y, z])[0]
                 same_grid[cnt][4] += bi_y([x, y, z])[0]
@@ -100,22 +104,24 @@ for i in range(len(pax)):
 combo_onax = same_grid[(same_grid[:,0]==0) & (same_grid[:,2]==0)]
 
 fig0, ax0 = plt.subplots(3, 1, sharex=True)
-ax0[0].scatter(Bonax[:,1], Bonax[:,3]*1e6, color = 'k')
-ax0[0].scatter(Conax[:,1], Conax[:,3]*1e6, color = 'k')
-ax0[0].scatter(Donax[:,1], Donax[:,3]*1e6, color = 'k')
+ax0[0].scatter(Aonax[:,1], Aonax[:,3]*1e6)
+ax0[0].scatter(Bonax[:,1], Bonax[:,3]*1e6)#, color = 'k')
+ax0[0].scatter(Conax[:,1], Conax[:,3]*1e6)#, color = 'k')
+ax0[0].scatter(Donax[:,1], Donax[:,3]*1e6)#, color = 'k')
 ax0[0].plot(combo_onax[:,1], combo_onax[:,3]*1e6, color='r')
 ax0[0].set_ylabel(r'$B_{x}$ $[\mu T]$', fontsize = 16)
 
-ax0[1].scatter(Bonax[:,1], Bonax[:,4]*1e6, color = 'k')
-ax0[1].scatter(Conax[:,1], Conax[:,4]*1e6, color = 'k')
-ax0[1].scatter(Donax[:,1], Donax[:,4]*1e6, color = 'k')
+ax0[1].scatter(Aonax[:,1], Aonax[:,4]*1e6)
+ax0[1].scatter(Bonax[:,1], Bonax[:,4]*1e6)#, color = 'k')
+ax0[1].scatter(Conax[:,1], Conax[:,4]*1e6)#, color = 'k')
+ax0[1].scatter(Donax[:,1], Donax[:,4]*1e6)#, color = 'k')
 ax0[1].plot(combo_onax[:,1], combo_onax[:,4]*1e6, color='r')
 ax0[1].set_ylabel(r'$B_{y}$ $[\mu T]$', fontsize = 16)
 
-#plt.scatter(Aonax[:,1], Aonax[:,5])
-ax0[2].scatter(Bonax[:,1], Bonax[:,5]*1e6, color = 'k')
-ax0[2].scatter(Conax[:,1], Conax[:,5]*1e6, color = 'k')
-ax0[2].scatter(Donax[:,1], Donax[:,5]*1e6, color = 'k')
+ax0[2].scatter(Aonax[:,1], Aonax[:,5]*1e6)
+ax0[2].scatter(Bonax[:,1], Bonax[:,5]*1e6)#, color = 'k')
+ax0[2].scatter(Conax[:,1], Conax[:,5]*1e6)#, color = 'k')
+ax0[2].scatter(Donax[:,1], Donax[:,5]*1e6)#, color = 'k')
 ax0[2].plot(combo_onax[:,1], combo_onax[:,5]*1e6, color = 'r')
 ax0[2].set_ylabel(r'$B_{z}$ $[\mu T]$', fontsize = 16)
 
